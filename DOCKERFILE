@@ -1,0 +1,52 @@
+# =============================================================================
+# VitalSign — Machine Learning Healthcare Analytics Dashboard Dockerfile
+# =============================================================================
+# Build command:
+#   docker build -t vitalsign .
+#
+# Run command (Web Dashboard on http://localhost:8000):
+#   docker run -d -p 8000:8000 --name vitalsign-container vitalsign
+#
+# Run arbitrary ML script inside container:
+#   docker run --rm vitalsign python supervised/Logistic_Regression.py
+# =============================================================================
+
+# Step 1: Base image using stable Python 3.11 slim (Linux Debian base)
+FROM python:3.11-slim
+
+# Step 2: Set Python environment variables
+# - PYTHONDONTWRITEBYTECODE: Prevents creation of .pyc files
+# - PYTHONUNBUFFERED: Flushes stdout/stderr immediately to Docker logs
+# - PORT: Default port exposed and used by app.py
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PORT=8000
+
+# Step 3: Install necessary system-level dependencies
+# - libgomp1: Essential OpenMP runtime required by LightGBM and multi-core ML operations
+# - curl: Used by Docker HEALTHCHECK to verify web server availability
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgomp1 \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Step 4: Create and configure the application working directory
+WORKDIR /app
+
+# Step 5: Leverage Docker layer caching for Python package dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Step 6: Copy the rest of the application files into the container
+COPY . .
+
+# Step 7: Expose application port (default 8000)
+EXPOSE 8000
+
+# Step 8: Healthcheck to verify the web server is answering requests
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:${PORT}/ || exit 1
+
+# Step 9: Launch the web dashboard server
+CMD ["python", "app.py"]

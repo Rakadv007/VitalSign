@@ -1,0 +1,298 @@
+{
+  "original_shape": [
+    101766,
+    50
+  ],
+  "processed_shape": [
+    101766,
+    133
+  ],
+  "missing_treatment": [
+    {
+      "column": "weight",
+      "action": "Dropped column",
+      "reason": "Missing percentage (96.86%) exceeded threshold of 70.0%"
+    },
+    {
+      "column": "max_glu_serum",
+      "action": "Dropped column",
+      "reason": "Missing percentage (94.75%) exceeded threshold of 70.0%"
+    },
+    {
+      "column": "A1Cresult",
+      "action": "Dropped column",
+      "reason": "Missing percentage (83.28%) exceeded threshold of 70.0%"
+    },
+    {
+      "column": "race",
+      "action": "Mode/Categorical Imputation",
+      "reason": "Imputed 2273 missing categorical entries with mode value (\"Caucasian\")"
+    },
+    {
+      "column": "payer_code",
+      "action": "Mode/Categorical Imputation",
+      "reason": "Imputed 40256 missing categorical entries with mode value (\"MC\")"
+    },
+    {
+      "column": "medical_specialty",
+      "action": "Mode/Categorical Imputation",
+      "reason": "Imputed 49949 missing categorical entries with mode value (\"InternalMedicine\")"
+    },
+    {
+      "column": "diag_1",
+      "action": "Mode/Categorical Imputation",
+      "reason": "Imputed 21 missing categorical entries with mode value (\"428\")"
+    },
+    {
+      "column": "diag_2",
+      "action": "Mode/Categorical Imputation",
+      "reason": "Imputed 358 missing categorical entries with mode value (\"276\")"
+    },
+    {
+      "column": "diag_3",
+      "action": "Mode/Categorical Imputation",
+      "reason": "Imputed 1423 missing categorical entries with mode value (\"250\")"
+    }
+  ],
+  "outlier_treatment": [
+    {
+      "feature": "admission_type_id",
+      "action": "Winsorization / Capping",
+      "clipped_count": 341,
+      "lower_limit": 1.0,
+      "upper_limit": 6.0
+    },
+    {
+      "feature": "discharge_disposition_id",
+      "action": "Winsorization / Capping",
+      "clipped_count": 144,
+      "lower_limit": 1.0,
+      "upper_limit": 25.0
+    },
+    {
+      "feature": "admission_source_id",
+      "action": "Winsorization / Capping",
+      "clipped_count": 175,
+      "lower_limit": 1.0,
+      "upper_limit": 17.0
+    },
+    {
+      "feature": "time_in_hospital",
+      "action": "Winsorization / Capping",
+      "clipped_count": 0,
+      "lower_limit": 1.0,
+      "upper_limit": 14.0
+    },
+    {
+      "feature": "num_lab_procedures",
+      "action": "Winsorization / Capping",
+      "clipped_count": 886,
+      "lower_limit": 1.0,
+      "upper_limit": 85.0
+    },
+    {
+      "feature": "num_procedures",
+      "action": "Winsorization / Capping",
+      "clipped_count": 0,
+      "lower_limit": 0.0,
+      "upper_limit": 6.0
+    },
+    {
+      "feature": "num_medications",
+      "action": "Winsorization / Capping",
+      "clipped_count": 1692,
+      "lower_limit": 3.0,
+      "upper_limit": 43.0
+    },
+    {
+      "feature": "number_outpatient",
+      "action": "Winsorization / Capping",
+      "clipped_count": 924,
+      "lower_limit": 0.0,
+      "upper_limit": 5.0
+    },
+    {
+      "feature": "number_emergency",
+      "action": "Winsorization / Capping",
+      "clipped_count": 939,
+      "lower_limit": 0.0,
+      "upper_limit": 3.0
+    },
+    {
+      "feature": "number_inpatient",
+      "action": "Winsorization / Capping",
+      "clipped_count": 724,
+      "lower_limit": 0.0,
+      "upper_limit": 6.0
+    },
+    {
+      "feature": "number_diagnoses",
+      "action": "Winsorization / Capping",
+      "clipped_count": 334,
+      "lower_limit": 2.0,
+      "upper_limit": 9.0
+    }
+  ],
+  "encoding_info": [
+    {
+      "feature": "medical_specialty",
+      "method": "Top-10 Grouped One-Hot",
+      "unique_before": 72
+    },
+    {
+      "feature": "diag_1",
+      "method": "Top-10 Grouped One-Hot",
+      "unique_before": 716
+    },
+    {
+      "feature": "diag_2",
+      "method": "Top-10 Grouped One-Hot",
+      "unique_before": 748
+    },
+    {
+      "feature": "diag_3",
+      "method": "Top-10 Grouped One-Hot",
+      "unique_before": 789
+    }
+  ],
+  "target_mapping": {
+    "0": "<30",
+    "1": ">30",
+    "2": "NO"
+  },
+  "columns": [
+    "admission_type_id",
+    "discharge_disposition_id",
+    "admission_source_id",
+    "time_in_hospital",
+    "num_lab_procedures",
+    "num_procedures",
+    "num_medications",
+    "number_outpatient",
+    "number_emergency",
+    "number_inpatient",
+    "number_diagnoses",
+    "race_Asian",
+    "race_Caucasian",
+    "race_Hispanic",
+    "race_Other",
+    "gender_Male",
+    "gender_Unknown/Invalid",
+    "age_[10-20)",
+    "age_[20-30)",
+    "age_[30-40)",
+    "age_[40-50)",
+    "age_[50-60)",
+    "age_[60-70)",
+    "age_[70-80)",
+    "age_[80-90)",
+    "age_[90-100)",
+    "payer_code_CH",
+    "payer_code_CM",
+    "payer_code_CP",
+    "payer_code_DM",
+    "payer_code_FR",
+    "payer_code_HM",
+    "payer_code_MC",
+    "payer_code_MD",
+    "payer_code_MP",
+    "payer_code_OG",
+    "payer_code_OT",
+    "payer_code_PO",
+    "payer_code_SI",
+    "payer_code_SP",
+    "payer_code_UN",
+    "payer_code_WC",
+    "medical_specialty_Emergency/Trauma",
+    "medical_specialty_Family/GeneralPractice",
+    "medical_specialty_InternalMedicine",
+    "medical_specialty_Nephrology",
+    "medical_specialty_Orthopedics",
+    "medical_specialty_Orthopedics-Reconstructive",
+    "medical_specialty_Other",
+    "medical_specialty_Pulmonology",
+    "medical_specialty_Radiologist",
+    "medical_specialty_Surgery-General",
+    "diag_1_414",
+    "diag_1_427",
+    "diag_1_428",
+    "diag_1_434",
+    "diag_1_486",
+    "diag_1_491",
+    "diag_1_682",
+    "diag_1_715",
+    "diag_1_786",
+    "diag_1_Other",
+    "diag_2_276",
+    "diag_2_401",
+    "diag_2_403",
+    "diag_2_411",
+    "diag_2_414",
+    "diag_2_427",
+    "diag_2_428",
+    "diag_2_496",
+    "diag_2_599",
+    "diag_2_Other",
+    "diag_3_272",
+    "diag_3_276",
+    "diag_3_401",
+    "diag_3_403",
+    "diag_3_414",
+    "diag_3_427",
+    "diag_3_428",
+    "diag_3_496",
+    "diag_3_585",
+    "diag_3_Other",
+    "metformin_No",
+    "metformin_Steady",
+    "metformin_Up",
+    "repaglinide_No",
+    "repaglinide_Steady",
+    "repaglinide_Up",
+    "nateglinide_No",
+    "nateglinide_Steady",
+    "nateglinide_Up",
+    "chlorpropamide_No",
+    "chlorpropamide_Steady",
+    "chlorpropamide_Up",
+    "glimepiride_No",
+    "glimepiride_Steady",
+    "glimepiride_Up",
+    "acetohexamide_Steady",
+    "glipizide_No",
+    "glipizide_Steady",
+    "glipizide_Up",
+    "glyburide_No",
+    "glyburide_Steady",
+    "glyburide_Up",
+    "tolbutamide_Steady",
+    "pioglitazone_No",
+    "pioglitazone_Steady",
+    "pioglitazone_Up",
+    "rosiglitazone_No",
+    "rosiglitazone_Steady",
+    "rosiglitazone_Up",
+    "acarbose_No",
+    "acarbose_Steady",
+    "acarbose_Up",
+    "miglitol_No",
+    "miglitol_Steady",
+    "miglitol_Up",
+    "troglitazone_Steady",
+    "tolazamide_Steady",
+    "tolazamide_Up",
+    "insulin_No",
+    "insulin_Steady",
+    "insulin_Up",
+    "glyburide-metformin_No",
+    "glyburide-metformin_Steady",
+    "glyburide-metformin_Up",
+    "glipizide-metformin_Steady",
+    "glimepiride-pioglitazone_Steady",
+    "metformin-rosiglitazone_Steady",
+    "metformin-pioglitazone_Steady",
+    "change_No",
+    "diabetesMed_Yes",
+    "readmitted"
+  ]
+}

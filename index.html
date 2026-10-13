@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VitalSign — Machine Learning Healthcare Analytics Dashboard</title>
+  <meta name="description" content="Interactive Patient Vital Signs, Length of Stay Regression & Readmission Risk Machine Learning Web Application built with HTML5, CSS3, JavaScript, and Chart.js.">
+  
+  <!-- Google Fonts & FontAwesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="styles.css?v=2.1">
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<div id="app-container">
+  
+  <!-- ==========================================
+       SIDEBAR NAVIGATION
+       ========================================== -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <i class="fa-solid fa-heart-pulse brand-icon"></i>
+      <div>
+        <div class="brand-title">VitalSign</div>
+        <div class="brand-subtitle">ML Analytics Platform</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Main Dashboard</div>
+      <div class="nav-item active" data-page="page-dashboard">
+        <i class="fa-solid fa-chart-pie"></i>
+        <span>Overview Dashboard</span>
+      </div>
+      <div class="nav-item" data-page="page-preprocessing">
+        <i class="fa-solid fa-sliders"></i>
+        <span>Data Preprocessing</span>
+      </div>
+      <div class="nav-item" data-page="page-eda">
+        <i class="fa-solid fa-magnifying-glass-chart"></i>
+        <span>Exploratory Analysis</span>
+      </div>
+
+      <div class="nav-section-title">Machine Learning</div>
+      <div class="nav-item" data-page="page-supervised">
+        <i class="fa-solid fa-robot"></i>
+        <span>Supervised Models</span>
+      </div>
+      <div class="nav-item" data-page="page-unsupervised">
+        <i class="fa-solid fa-diagram-project"></i>
+        <span>Clustering & Anomaly</span>
+      </div>
+
+      <div class="nav-section-title">Model Evaluation</div>
+      <div class="nav-item" data-page="page-metrics">
+        <i class="fa-solid fa-chart-simple"></i>
+        <span>Metrics</span>
+      </div>
+      <div class="nav-item" data-page="page-learning-curves">
+        <i class="fa-solid fa-arrow-trend-up"></i>
+        <span>Learning Curves</span>
+      </div>
+
+      <div class="nav-section-title">Clinical Tool</div>
+      <div class="nav-item" data-page="page-predictor">
+        <i class="fa-solid fa-user-doctor"></i>
+        <span>Risk & Stay Predictor</span>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div>Dataset: Diabetes Patient Vitals</div>
+      <div style="font-weight: 600; color: var(--primary);">101,766 Clinical Records</div>
+      <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 2px;">Targets: time_in_hospital & readmitted</div>
+    </div>
+  </aside>
+
+  <!-- ==========================================
+       MAIN WRAPPER & TOP HEADER
+       ========================================== -->
+  <div class="main-wrapper">
+    
+    <header class="top-header">
+      <div class="header-title-group">
+        <h1 id="current-page-title">Overview Dashboard</h1>
+      </div>
+
+      <div class="header-badges">
+        <span class="badge badge-mint badge-pulse"><i class="fa-solid fa-circle"></i> Pipeline Active</span>
+        <span class="badge badge-yellow"><i class="fa-solid fa-database"></i> 133 Features</span>
+        <span class="badge" title="Target for Supervised Regression"><i class="fa-solid fa-clock"></i> Target 1: time_in_hospital</span>
+        <span class="badge" title="Target for Binary Classification (2 Classes)"><i class="fa-solid fa-bullseye"></i> Target 2: readmitted (2 Classes)</span>
+      </div>
+    </header>
+
+    <main class="content-body">
+
+      <!-- ==========================================
+           1. DASHBOARD OVERVIEW VIEW
+           ========================================== -->
+      <section id="page-dashboard" class="page-view active">
+        <div class="view-header">
+          <h2><i class="fa-solid fa-hospital-user" style="color: var(--primary);"></i> Hospital Patient Vital Signs & ML Analytics</h2>
+          <p>Dual-target machine learning pipeline predicting length of stay (Regression) and 30-day patient readmission risk (Binary 2-Class Classification).</p>
+        </div>
+
+        <!-- KPI Cards Grid -->
+        <div class="grid-4">
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-label">Total Patient Records</span>
+              <div class="kpi-icon"><i class="fa-solid fa-users"></i></div>
+            </div>
+            <div class="kpi-value">101,766</div>
+            <div class="kpi-subtext">Cleaned clinical encounter records</div>
+          </div>
+
+          <div class="kpi-card cyan">
+            <div class="kpi-header">
+              <span class="kpi-label">Features Engineered</span>
+              <div class="kpi-icon"><i class="fa-solid fa-table-columns"></i></div>
+            </div>
+            <div class="kpi-value">133</div>
+            <div class="kpi-subtext">50 Raw &rarr; 133 Scaled & Encoded</div>
+          </div>
+
+          <div class="kpi-card amber">
+            <div class="kpi-header">
+              <span class="kpi-label">Top Regressor (XGBoost)</span>
+              <div class="kpi-icon"><i class="fa-solid fa-trophy"></i></div>
+            </div>
+            <div class="kpi-value">MAE 1.73d</div>
+            <div class="kpi-subtext">Target: time_in_hospital (R&sup2; 0.3975)</div>
+          </div>
+
+          <div class="kpi-card purple">
+            <div class="kpi-header">
+              <span class="kpi-label">Top Classifier (LightGBM)</span>
+              <div class="kpi-icon"><i class="fa-solid fa-award"></i></div>
+            </div>
+            <div class="kpi-value">AUC 0.6977</div>
+            <div class="kpi-subtext">Target: readmitted (2 Classes, Acc 64.2%)</div>
+          </div>
+        </div>
+
+        <!-- Dual Target Visualizations -->
+        <div class="grid-2">
+          <div class="glass-panel">
+            <div class="panel-header">
+              <div class="panel-title"><i class="fa-solid fa-chart-pie" style="color: var(--primary);"></i> Target 1: Readmission Distribution (Binary 2 Classes)</div>
+            </div>
+            <div class="chart-container">
+              <canvas id="targetDistChart"></canvas>
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-dim); text-align: center; margin-top: 0.5rem;">
+              Balanced classes: NO (53.9%) vs Readmitted (46.1%) | Imbalance Ratio: 1.17:1
+            </div>
+          </div>
+
+          <div class="glass-panel">
+            <div class="panel-header">
+              <div class="panel-title"><i class="fa-solid fa-chart-column" style="color: var(--accent-cyan);"></i> Target 2: Length of Hospital Stay (time_in_hospital)</div>
+            </div>
+            <div class="chart-container">
+              <canvas id="timeInHospDistChart"></canvas>
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-dim); text-align: center; margin-top: 0.5rem;">
+              Range: 1 to 14 days | Mean: 4.40 days | Median: 4.0 days | IQR: 2.0 &ndash; 6.0 days
+            </div>
+          </div>
+        </div>
+
+        <!-- Dataset Preview (df.head(10)) Section -->
+        <div class="head-preview-container">
+          <div class="head-toolbar">
+            <div class="head-title">
+              <i class="fa-solid fa-table" style="color: var(--primary);"></i>
+              <span>Dataset Preview &mdash; First 10 Records (<code>df.head(10)</code>)</span>
+              <span class="badge badge-mint" style="margin-left: 0.5rem;">10 Rows &times; 50 Columns</span>
+            </div>
+            <div class="head-search-box">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="headSearchInput" class="head-search-input" placeholder="Filter columns or values...">
+            </div>
+          </div>
+          
+          <div class="head-table-scroll">
+            <table class="head-data-table" id="headDataTable">
+              <thead id="headTableHead">
+                <!-- Dynamically populated column headers -->
+              </thead>
+              <tbody id="headTableBody">
+                <!-- Dynamically populated 10 rows -->
+              </tbody>
+            </table>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.85rem; font-size: 0.8rem; color: var(--text-muted);">
+            <div><i class="fa-solid fa-arrows-left-right" style="color: var(--primary);"></i> Scroll horizontally to view all 50 features. Row index (0&ndash;9) is fixed.</div>
+            <div>Source: <code>data/original/diabetic_data.csv</code></div>
+          </div>
+        </div>
+
+        <!-- Metadata Summary Table -->
+        <div class="glass-panel" style="margin-top: 1.75rem;">
+          <div class="panel-header">
+            <div class="panel-title"><i class="fa-solid fa-circle-info" style="color: var(--secondary);"></i> Dataset Health & Architecture Summary</div>
+          </div>
+          <div class="table-responsive">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Component</th>
+                  <th>Value</th>
+                  <th>Pipeline Status</th>
+                  <th>Clinical Details</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Source Clinical Dataset</strong></td>
+                  <td><code>diabetic_data.csv</code></td>
+                  <td><span class="tag tag-success">Loaded</span></td>
+                  <td>101,766 hospital encounters across 130 US medical centers</td>
+                </tr>
+                <tr>
+                  <td><strong>Supervised Target 1 (Regression)</strong></td>
+                  <td><code>time_in_hospital</code></td>
+                  <td><span class="tag tag-success">Continuous</span></td>
+                  <td>Length of hospital stay (1 to 14 days), evaluated with 6 regressors</td>
+                </tr>
+                <tr>
+                  <td><strong>Supervised Target 2 (Classification)</strong></td>
+                  <td><code>readmitted</code> (2 Classes)</td>
+                  <td><span class="tag tag-success">Binary</span></td>
+                  <td>NO (54,864) vs Readmitted (46,902), 0: NO, 1: Readmitted</td>
+                </tr>
+                <tr>
+                  <td><strong>Unsupervised Pipeline</strong></td>
+                  <td>Target-Free Clustering</td>
+                  <td><span class="tag tag-info">Independent</span></td>
+                  <td>K-Means (K=3), Hierarchical (Ward), DBSCAN, Isolation Forest, PCA</td>
+                </tr>
+                <tr>
+                  <td><strong>Data Cleanliness</strong></td>
+                  <td>0 Duplicates (0.0%)</td>
+                  <td><span class="tag tag-success">Verified</span></td>
+                  <td>71,518 unique patients, 30,248 repeat hospitalizations tracked</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           2. DATA PREPROCESSING VIEW
+           ========================================== -->
+      <section id="page-preprocessing" class="page-view">
+        <div class="view-header">
+          <h2><i class="fa-solid fa-sliders" style="color: var(--primary);"></i> Data Preprocessing Pipeline</h2>
+          <p>Imputation of missing values, 1.5 &times; IQR Winsorization outlier capping, feature scaling, and categorical encoding.</p>
+        </div>
+
+        <div class="sub-tabs">
+          <button class="tab-btn active" data-tab="tab-missing">1. Missing Value Treatment</button>
+          <button class="tab-btn" data-tab="tab-outliers">2. Outlier Capping (Winsorization)</button>
+          <button class="tab-btn" data-tab="tab-encoding">3. Scaling & Encoding Strategy</button>
+        </div>
+
+        <div id="tab-missing" class="tab-content active">
+          <div class="glass-panel">
+            <div class="panel-header">
+              <div class="panel-title"><i class="fa-solid fa-filter"></i> Missing Value Treatment Summary</div>
+            </div>
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Column Name</th>
+                    <th>Action Taken</th>
+                    <th>Missing Count / %</th>
+                    <th>Rationale & Details</th>
+                  </tr>
+                </thead>
+                <tbody id="missingTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div id="tab-outliers" class="tab-content">
+          <div class="glass-panel">
+            <div class="panel-header">
+              <div class="panel-title"><i class="fa-solid fa-scissors"></i> Outlier Capping (1.5 &times; IQR Winsorization)</div>
+            </div>
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Numerical Feature</th>
+                    <th>Lower Limit Bound</th>
+                    <th>Upper Limit Bound</th>
+                    <th>Clipped Values Count</th>
+                  </tr>
+                </thead>
+                <tbody id="outlierTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div id="tab-encoding" class="tab-content">
+          <div class="grid-2">
+            <div class="glass-panel">
+              <div class="panel-header">
+                <div class="panel-title"><i class="fa-solid fa-gauge-high"></i> Feature Scaling (No Leakage)</div>
+              </div>
+              <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.6;">
+                All continuous numerical columns (<code>num_lab_procedures</code>, <code>num_medications</code>, <code>num_procedures</code>, etc.) are standardized using <strong>StandardScaler</strong> (\(z = \frac{x - \mu}{\sigma}\)) fitted strictly on the training partition to prevent test data leakage.
+              </p>
+            </div>
+
+            <div class="glass-panel">
+              <div class="panel-header">
+                <div class="panel-title"><i class="fa-solid fa-tags"></i> Categorical & Binary Encoding</div>
+              </div>
+              <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.6;">
+                High-cardinality diagnoses (ICD-9 codes) and medical specialties are grouped into top-10 frequent categories + "Other". Target variable <code>readmitted</code> is formatted as binary 2-class (<code>0: NO</code>, <code>1: Readmitted</code>).
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           3. EXPLORATORY DATA ANALYSIS VIEW
+           ========================================== -->
+      <section id="page-eda" class="page-view">
+        <div class="view-header">
+          <h2><i class="fa-solid fa-magnifying-glass-chart" style="color: var(--accent-cyan);"></i> Exploratory Data Analysis (EDA)</h2>
+          <p>Comprehensive interactive statistical visualizations across data structure, missingness, target distributions, numeric KDE curves, outliers, correlation matrices, bivariate regression scatter plots, and category frequencies.</p>
+        </div>
+
+        <!-- EDA Sub-Navigation Pills -->
+        <div class="eda-pill-nav">
+          <button class="eda-pill-btn active" data-eda="eda-sec-structure"><i class="fa-solid fa-database"></i> 1. Load Data & Structure</button>
+          <button class="eda-pill-btn" data-eda="eda-sec-missing"><i class="fa-solid fa-filter-circle-xmark"></i> 2. Missing & Duplicates</button>
+          <button class="eda-pill-btn" data-eda="eda-sec-targets"><i class="fa-solid fa-bullseye"></i> 3. Target Distributions</button>
+          <button class="eda-pill-btn" data-eda="eda-sec-numeric"><i class="fa-solid fa-chart-area"></i> 4. Numeric Distributions</button>
+          <button class="eda-pill-btn" data-eda="eda-sec-outliers"><i class="fa-solid fa-box-tissue"></i> 5. Outliers (Boxplots)</button>
+          <button class="eda-pill-btn" data-eda="eda-sec-correlation"><i class="fa-solid fa-fire-flame-curved"></i> 6. Correlation Analysis</button>
+          <button class="eda-pill-btn" data-eda="eda-sec-bivariate"><i class="fa-solid fa-chart-line"></i> 7. Bivariate Scatter Plots</button>
+          <button class="eda-pill-btn" data-eda="eda-sec-categorical"><i class="fa-solid fa-tags"></i> 8. Categorical Counts</button>
+        </div>
+
+        <!-- EDA 1: Load Data & Structure -->
+        <div id="eda-sec-structure" class="eda-section active">
+          <div class="grid-4">
+            <div class="kpi-card">
+              <div class="kpi-header"><span class="kpi-label">Source File</span><div class="kpi-icon"><i class="fa-solid fa-file-csv"></i></div></div>
+              <div class="kpi-value" style="font-size: 1.4rem;">diabetic_data.csv</div>
+              <div class="kpi-subtext">Original size: 18.27 MB</div>
+            </div>
+            <div class="kpi-card cyan">
+              <div class="kpi-header"><span class="kpi-label">Observations</span><div class="kpi-icon"><i class="fa-solid fa-table-cells"></i></div></div>
+              <div class="kpi-value">101,766</div>
+              <div class="kpi-subtext">100% Valid encounters</div>
+            </div>
+            <div class="kpi-card amber">
+              <div class="kpi-header"><span class="kpi-label">Raw Features</span><div class="kpi-icon"><i class="fa-solid fa-list-check"></i></div></div>
+              <div class="kpi-value">50 Cols</div>
+              <div class="kpi-subtext">13 Numerical, 37 Categorical</div>
+            </div>
+            <div class="kpi-card purple">
+              <div class="kpi-header"><span class="kpi-label">Memory Footprint</span><div class="kpi-icon"><i class="fa-solid fa-memory"></i></div></div>
+              <div class="kpi-value">48.51 MB</div>
+              <div class="kpi-subtext">In-memory DataFrame allocation</div>
+            </div>
+          </div>
+
+          <div class="glass-panel">
+            <div class="panel-header">
+              <div class="panel-title"><i class="fa-solid fa-calculator"></i> Summary Statistics of Key Numerical Features</div>
+            </div>
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Feature Name</th>
+                    <th>Mean</th>
+                    <th>Std Dev</th>
+                    <th>Min</th>
+                    <th>Median (50%)</th>
+                    <th>Max</th>
+                    <th>Skewness</th>
+                    <th>Kurtosis</th>
+                  </tr>
+                </thead>
+                <tbody id="edaStatsTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- EDA 2: Missing Values & Duplicates -->
+        <div id="eda-sec-missing" class="eda-section">
+          <div class="grid-2">
+            <div class="glass-panel">
+              <div class="panel-header">
+                <div class="panel-title"><i class="fa-solid fa-chart-bar" style="color: var(--accent-rose);"></i> Missing Values Percentage by Feature</div>
+              </div>
+              <div class="chart-container">
+                <canvas id="edaMissingChart"></canvas>
+              </div>
+            </div>
+
+            <div class="glass-panel">
+              <div class="panel-header">
+                <div class="panel-title"><i class="fa-solid fa-copy" style="color: var(--primary);"></i> Duplicate Encounter & Patient Analysis</div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 1.25rem; padding-top: 0.5rem;">
+                <div class="tilt-metric-item" style="padding: 1.25rem;">
+                  <div class="tilt-metric-label">EXACT DUPLICATE ROWS</div>
+                  <div class="tilt-metric-value highlight-mint" style="font-size: 2rem;">0 Rows (0.0%)</div>
+                  <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.35rem;">
+                    Every record represents a distinct hospitalization encounter ID.
+                  </div>
+                </div>
+
+                <div class="tilt-metric-item" style="padding: 1.25rem;">
+                  <div class="tilt-metric-label">UNIQUE PATIENTS ENCOUNTERED</div>
+                  <div class="tilt-metric-value highlight-yellow" style="font-size: 2rem;">71,518 Patients</div>
+                  <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.35rem;">
+                    Across 101,766 total admissions (30,248 repeat clinical admissions identified).
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- EDA 3: Target Distributions (2 Targets) -->
+        <div id="eda-sec-targets" class="eda-section">
+          <div class="grid-2">
+            <div class="glass-panel">
+              <div class="panel-header">
+                <div class="panel-title"><i class="fa-solid fa-bullseye" style="color: var(--primary);"></i> Target 1: Binary Readmission Distribution (readmitted)</div>
+              </div>
+              <div class="chart-container">
+                <canvas id="edaTargetReadmChart"></canvas>
+              </div>
+              <div class="table-responsive" style="margin-top: 1rem;">
+                <table class="custom-table">
+                  <thead>
+                    <tr><th>Target Class</th><th>Record Count</th><th>Percentage (%)</th><th>Binary Code</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td><strong>NO (No Readmission)</strong></td><td>54,864</td><td>53.91%</td><td><code>0</code></td></tr>
+                    <tr><td><strong>Readmitted (&lt;30 or &gt;30 Days)</strong></td><td>46,902</td><td>46.09%</td><td><code>1</code></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="glass-panel">
+              <div class="panel-header">
+                <div class="panel-title"><i class="fa-solid fa-clock" style="color: var(--secondary);"></i> Target 2: Length of Hospital Stay (time_in_hospital)</div>
+              </div>
+              <div class="chart-container">
+                <canvas id="edaTargetTimeChart"></canvas>
+              </div>
+              <div class="table-responsive" style="margin-top: 1rem;">
+                <table class="custom-table">
+                  <thead>
+                    <tr><th>Metric</th><th>Days</th><th>Metric</th><th>Days</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td><strong>Mean Stay</strong></td><td>4.40 days</td><td><strong>Median (50%)</strong></td><td>4.0 days</td></tr>
+                    <tr><td><strong>Min Stay</strong></td><td>1.0 day</td><td><strong>Max Stay</strong></td><td>14.0 days</td></tr>
+                    <tr><td><strong>Std Dev</strong></td><td>2.99 days</td><td><strong>IQR (Q1&ndash;Q3)</strong></td><td>2.0 &ndash; 6.0 days</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- EDA 4: Numeric Feature Distributions -->
+        <div id="eda-sec-numeric" class="eda-section">
+          <div class="glass-panel">
+            <div class="panel-header" style="justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+              <div class="panel-title"><i class="fa-solid fa-chart-area" style="color: var(--accent-cyan);"></i> Numerical Feature Histogram & Density Curve</div>
+              <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <label for="edaNumFeatureSelect" style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Select Feature:</label>
+                <select id="edaNumFeatureSelect" class="eda-select-control">
+                  <option value="time_in_hospital">time_in_hospital (Days)</option>
+                  <option value="num_lab_procedures">num_lab_procedures (Lab Tests)</option>
+                  <option value="num_medications">num_medications (Prescriptions)</option>
+                  <option value="num_procedures">num_procedures (Operations)</option>
+                  <option value="number_diagnoses">number_diagnoses (Diagnosis Codes)</option>
+                  <option value="number_inpatient">number_inpatient (Prior Inpatient)</option>
+                  <option value="number_emergency">number_emergency (Prior ER)</option>
+                  <option value="number_outpatient">number_outpatient (Prior Outpatient)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid-4" style="margin-bottom: 1.25rem;" id="edaNumMetricChips">
+              <!-- Dynamically populated stats chips -->
+            </div>
+
+            <div class="chart-container" style="height: 380px;">
+              <canvas id="edaNumericHistChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- EDA 5: Outlier Detection (Boxplots) -->
+        <div id="eda-sec-outliers" class="eda-section">
+          <div class="glass-panel">
+            <div class="panel-header" style="justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+              <div class="panel-title"><i class="fa-solid fa-box-tissue" style="color: var(--accent-amber);"></i> Outlier Detection (1.5 &times; IQR Boxplot Analysis)</div>
+              <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <label for="edaOutlierSelect" style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Select Feature:</label>
+                <select id="edaOutlierSelect" class="eda-select-control">
+                  <option value="time_in_hospital">time_in_hospital</option>
+                  <option value="num_lab_procedures">num_lab_procedures</option>
+                  <option value="num_medications">num_medications</option>
+                  <option value="num_procedures">num_procedures</option>
+                  <option value="number_diagnoses">number_diagnoses</option>
+                  <option value="number_inpatient">number_inpatient</option>
+                  <option value="number_emergency">number_emergency</option>
+                  <option value="number_outpatient">number_outpatient</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="chart-container" style="height: 340px;">
+              <canvas id="edaBoxplotChart"></canvas>
+            </div>
+
+            <div class="table-responsive" style="margin-top: 1.5rem;">
+              <table class="custom-table" id="edaOutliersTable">
+                <thead>
+                  <tr>
+                    <th>Feature</th>
+                    <th>Q1 (25%)</th>
+                    <th>Median (50%)</th>
+                    <th>Q3 (75%)</th>
+                    <th>IQR</th>
+                    <th>Lower Fence</th>
+                    <th>Upper Fence</th>
+                    <th>Outlier Count</th>
+                    <th>Outlier %</th>
+                  </tr>
+                </thead>
+                <tbody id="edaOutlierTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- EDA 6: Correlation Analysis -->
+        <div id="eda-sec-correlation" class="eda-section">
+          <div class="glass-panel">
+            <div class="panel-header">
+              <div class="panel-title"><i class="fa-solid fa-fire-flame-curved" style="color: var(--accent-rose);"></i> Full Pearson Correlation Matrix Heatmap</div>
+            </div>
+            <div class="table-responsive" style="max-height: 440px; overflow: auto;">
+              <table class="custom-table" id="edaHeatmapTable">
+                <!-- Dynamically generated correlation table with color intensity -->
+              </table>
+            </div>
+          </div>
+
+          <div class="grid-2" style="margin-top: 1.5rem;">
+            <div class="glass-panel">
+              <div class="panel-header">
+                <div class="panel-title"><i class="fa-solid fa-chart-column" style="color: var(--primary);"></i> Feature Correlation with Target 1: time_in_hospital</div>
+              </div>
+              <div class="chart-container">
+                <canvas id="edaCorrTimeChart"></canvas>
+              </div>
+            </div>
+
+            <div class="glass-panel">
+              <div class="panel-header">
+                <div class="panel-title"><i class="fa-solid fa-chart-column" style="color: var(--secondary);"></i> Feature Correlation with Target 2: readmitted</div>
+              </div>
+              <div class="chart-container">
+                <canvas id="edaCorrReadmChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Top Collinear Pairs Table -->
+          <div class="glass-panel" style="margin-top: 1.5rem;">
+            <div class="panel-header">
+              <div class="panel-title"><i class="fa-solid fa-link" style="color: var(--accent-cyan);"></i> Top Collinear Feature Pairs (Multivariate Interaction)</div>
+            </div>
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr><th>Feature 1</th><th>Feature 2</th><th>Pearson Correlation (r)</th><th>Strength & Interaction</th></tr>
+                </thead>
+                <tbody id="edaCollinearTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- EDA 7: Bivariate Relationship Plots (Regression Scatter) -->
+        <div id="eda-sec-bivariate" class="eda-section">
+          <div class="glass-panel">
+            <div class="panel-header" style="justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+              <div class="panel-title"><i class="fa-solid fa-chart-line" style="color: var(--primary);"></i> Bivariate Scatter Plots & OLS Regression Trendlines</div>
+              <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <label for="edaBivariateSelect" style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Independent Variable (X):</label>
+                <select id="edaBivariateSelect" class="eda-select-control">
+                  <option value="num_medications">num_medications vs time_in_hospital</option>
+                  <option value="num_lab_procedures">num_lab_procedures vs time_in_hospital</option>
+                  <option value="number_diagnoses">number_diagnoses vs time_in_hospital</option>
+                  <option value="num_procedures">num_procedures vs time_in_hospital</option>
+                  <option value="number_inpatient">number_inpatient vs time_in_hospital</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid-3" style="margin-bottom: 1.25rem;" id="edaBivariateChips">
+              <!-- Dynamically populated slope, intercept, r chips -->
+            </div>
+
+            <div class="chart-container" style="height: 380px;">
+              <canvas id="edaScatterChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- EDA 8: Categorical Feature Counts -->
+        <div id="eda-sec-categorical" class="eda-section">
+          <div class="grid-2">
+            <div class="glass-panel">
+              <div class="panel-header">
+                <div class="panel-title"><i class="fa-solid fa-user-group" style="color: var(--primary);"></i> Age Group Distribution</div>
+              </div>
+              <div class="chart-container">
+                <canvas id="edaAgeCatChart"></canvas>
+              </div>
+            </div>
+
+            <div class="glass-panel">
+              <div class="panel-header">
+                <div class="panel-title"><i class="fa-solid fa-pills" style="color: var(--accent-cyan);"></i> Diabetes Medication Prescribed (diabetesMed)</div>
+              </div>
+              <div class="chart-container">
+                <canvas id="edaMedCatChart"></canvas>
+              </div>
+            </div>
+
+            <div class="glass-panel">
+              <div class="panel-header">
+                <div class="panel-title"><i class="fa-solid fa-arrows-rotate" style="color: var(--accent-amber);"></i> Medication Dosage Change (change)</div>
+              </div>
+              <div class="chart-container">
+                <canvas id="edaChangeCatChart"></canvas>
+              </div>
+            </div>
+
+            <div class="glass-panel">
+              <div class="panel-header">
+                <div class="panel-title"><i class="fa-solid fa-vial-virus" style="color: var(--accent-purple);"></i> HbA1c Lab Test Result (A1Cresult)</div>
+              </div>
+              <div class="chart-container">
+                <canvas id="edaA1cCatChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           4. SUPERVISED LEARNING VIEW
+           ========================================== -->
+      <section id="page-supervised" class="page-view">
+        <div class="view-header">
+          <h2><i class="fa-solid fa-robot" style="color: var(--primary);"></i> Supervised Machine Learning Benchmarks</h2>
+          <p>Interactive 3D Tilt cards with click-to-expand details across all regression and binary classification models.</p>
+        </div>
+
+        <!-- Supervised Task Sub-tabs -->
+        <div class="sub-tabs">
+          <button class="tab-btn active" data-tab="tab-sup-regression"><i class="fa-solid fa-chart-line"></i> 1. Regression Models (Target: time_in_hospital)</button>
+          <button class="tab-btn" data-tab="tab-sup-classification"><i class="fa-solid fa-bullseye"></i> 2. Binary Classification Models (Target: readmitted)</button>
+        </div>
+
+        <!-- 1. Regression Models Tab (Default) -->
+        <div id="tab-sup-regression" class="tab-content active">
+          <div style="margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+            <div>
+              <span class="badge badge-mint"><i class="fa-solid fa-bullseye"></i> Target: time_in_hospital</span>
+              <span class="badge badge-yellow" style="margin-left: 0.5rem;"><i class="fa-solid fa-calculator"></i> Metrics: MAE, MSE, RMSE, R&sup2;, Adjusted R&sup2;</span>
+            </div>
+            <div style="font-size: 0.85rem; color: var(--text-muted);"><i class="fa-solid fa-computer-mouse" style="color: var(--primary);"></i> Hover card for 3D tilt &bull; Click card to expand full report</div>
+          </div>
+
+          <!-- 3D Tilt Cards Grid for Regression Models -->
+          <div class="tilt-cards-grid" id="regressionCardsGrid">
+            <!-- Dynamically populated tilt cards for:
+                 1. Linear Regression
+                 2. Random Forest Regressor
+                 3. AdaBoost Regressor
+                 4. Gradient Boosting Regressor
+                 5. XGBoost Regressor
+                 6. LightGBM Regressor
+            -->
+          </div>
+        </div>
+
+        <!-- 2. Binary Classification Models Tab -->
+        <div id="tab-sup-classification" class="tab-content">
+          <div style="margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+            <div>
+              <span class="badge badge-mint"><i class="fa-solid fa-bullseye"></i> Target: readmitted (Binary: 2 Classes)</span>
+              <span class="badge badge-yellow" style="margin-left: 0.5rem;"><i class="fa-solid fa-scale-balanced"></i> Classes: NO (0) vs Readmitted (1)</span>
+            </div>
+            <div style="font-size: 0.85rem; color: var(--text-muted);"><i class="fa-solid fa-computer-mouse" style="color: var(--primary);"></i> Hover card for 3D tilt &bull; Click card to expand full report</div>
+          </div>
+
+          <!-- 3D Tilt Cards Grid for Classification Models -->
+          <div class="tilt-cards-grid" id="classificationCardsGrid">
+            <!-- Dynamically populated tilt cards for:
+                 1. Logistic Regression
+                 2. Random Forest Classifier
+                 3. AdaBoost Classifier
+                 4. Gradient Boosting Classifier
+                 5. XGBoost Classifier
+                 6. LightGBM Classifier
+            -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           5. UNSUPERVISED & CLUSTERING VIEW
+           ========================================== -->
+      <section id="page-unsupervised" class="page-view">
+        <div class="view-header">
+          <h2><i class="fa-solid fa-diagram-project" style="color: var(--accent-purple);"></i> Unsupervised Learning & Anomaly Detection</h2>
+          <p>Target-free feature discovery: K-Means elbow optimization, Hierarchical Agglomerative clustering, DBSCAN, Isolation Forest, and PCA.</p>
+        </div>
+
+        <div style="margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+          <div>
+            <span class="badge badge-mint"><i class="fa-solid fa-fingerprint"></i> Target-Independent Machine Learning</span>
+            <span class="badge badge-yellow" style="margin-left: 0.5rem;"><i class="fa-solid fa-sparkles"></i> 5 Unsupervised Methods</span>
+          </div>
+          <div style="font-size: 0.85rem; color: var(--text-muted);"><i class="fa-solid fa-computer-mouse" style="color: var(--primary);"></i> Hover card for 3D tilt &bull; Click card to expand full report</div>
+        </div>
+
+        <!-- 3D Tilt Cards Grid for Unsupervised Models -->
+        <div class="tilt-cards-grid" id="unsupervisedCardsGrid">
+          <!-- Dynamically populated tilt cards for:
+               1. K-Means Clustering
+               2. Hierarchical Agglomerative Clustering
+               3. DBSCAN Density Clustering
+               4. Isolation Forest Anomaly Detection
+               5. Principal Component Analysis (PCA)
+          -->
+        </div>
+
+        <!-- Clustering Charts Row -->
+        <div class="grid-2">
+          <div class="glass-panel">
+            <div class="panel-header">
+              <div class="panel-title"><i class="fa-solid fa-chart-line" style="color: var(--accent-amber);"></i> K-Means Inertia Elbow Curve & Silhouette Scores</div>
+            </div>
+            <div class="chart-container">
+              <canvas id="elbowChart"></canvas>
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-dim); text-align: center; margin-top: 0.5rem;">
+              Optimal K = 3 Clusters identified at the elbow bend with peak silhouette coefficient (0.185).
+            </div>
+          </div>
+
+          <div class="glass-panel">
+            <div class="panel-header">
+              <div class="panel-title"><i class="fa-solid fa-shield-cat" style="color: var(--accent-rose);"></i> Clinical Cohorts & Anomaly Breakdown</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 1rem; padding-top: 0.5rem;">
+              <div class="tilt-metric-item" style="padding: 1.15rem;">
+                <div class="tilt-metric-label">K-MEANS OPTIMAL COHORTS</div>
+                <div class="tilt-metric-value highlight-mint">K = 3 Distinct Clusters</div>
+                <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.35rem;">
+                  Cluster 0: Moderate Stay (47.7%) &bull; Cluster 1: High Acuity / Elderly (31.8%) &bull; Cluster 2: Low-Risk (20.5%)
+                </div>
+              </div>
+
+              <div class="tilt-metric-item" style="padding: 1.15rem;">
+                <div class="tilt-metric-label">ISOLATION FOREST ANOMALIES IDENTIFIED</div>
+                <div class="tilt-metric-value highlight-yellow">5,088 Outlier Encounters (5.0%)</div>
+                <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.35rem;">
+                  Flags atypical clinical combinations (e.g. extreme lab counts with short stays).
+                </div>
+              </div>
+
+              <div class="tilt-metric-item" style="padding: 1.15rem;">
+                <div class="tilt-metric-label">PCA VARIANCE RETAINED (10 COMPONENTS)</div>
+                <div class="tilt-metric-value" style="color: var(--accent-cyan);">68.4% Cumulative Variance</div>
+                <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.35rem;">
+                  PC1 (14.8%) and PC2 (11.2%) capture medication complexity and diagnostic intensity.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           6. MODEL EVALUATION: METRICS & BENCHMARKS VIEW
+           ========================================== -->
+      <section id="page-metrics" class="page-view">
+        <div class="view-header">
+          <h2><i class="fa-solid fa-chart-simple" style="color: var(--primary);"></i> Model Evaluation — Quantitative Performance Metrics</h2>
+          <p>Standardized benchmarking tables and comparative evaluations across Supervised Regression, Binary Classification, and Unsupervised Clustering models.</p>
+        </div>
+
+        <!-- Top Evaluation KPI Highlights -->
+        <div class="grid-4">
+          <div class="kpi-card">
+            <div class="kpi-header"><span class="kpi-label">Top Regression Algorithm</span><div class="kpi-icon"><i class="fa-solid fa-trophy"></i></div></div>
+            <div class="kpi-value highlight-mint">XGBoost</div>
+            <div class="kpi-subtext">MAE: 1.73d &bull; R&sup2;: 0.3975</div>
+          </div>
+          <div class="kpi-card cyan">
+            <div class="kpi-header"><span class="kpi-label">Top Classifier Algorithm</span><div class="kpi-icon"><i class="fa-solid fa-award"></i></div></div>
+            <div class="kpi-value">LightGBM</div>
+            <div class="kpi-subtext">ROC-AUC: 0.6977 &bull; Accuracy: 64.2%</div>
+          </div>
+          <div class="kpi-card amber">
+            <div class="kpi-header"><span class="kpi-label">Top Clustering Model</span><div class="kpi-icon"><i class="fa-solid fa-circle-nodes"></i></div></div>
+            <div class="kpi-value">K-Means</div>
+            <div class="kpi-subtext">Optimal K=3 &bull; Silhouette: 0.185</div>
+          </div>
+          <div class="kpi-card purple">
+            <div class="kpi-header"><span class="kpi-label">Anomaly Detection Rate</span><div class="kpi-icon"><i class="fa-solid fa-shield-virus"></i></div></div>
+            <div class="kpi-value">5.0% Outliers</div>
+            <div class="kpi-subtext">Isolation Forest: 5,088 High-Acuity Encounters</div>
+          </div>
+        </div>
+
+        <!-- Metrics Navigation Sub-Tabs -->
+        <div class="sub-tabs">
+          <button class="tab-btn active" data-tab="tab-metric-regression"><i class="fa-solid fa-chart-line"></i> 1. Supervised Regression (time_in_hospital)</button>
+          <button class="tab-btn" data-tab="tab-metric-classification"><i class="fa-solid fa-bullseye"></i> 2. Binary Classification (readmitted)</button>
+          <button class="tab-btn" data-tab="tab-metric-clustering"><i class="fa-solid fa-diagram-project"></i> 3. Unsupervised Clustering & Anomaly Detection</button>
+        </div>
+
+        <!-- 1. Regression Metrics Tab -->
+        <div id="tab-metric-regression" class="tab-content active">
+          <div class="glass-panel">
+            <div class="panel-header" style="justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;">
+              <div class="panel-title"><i class="fa-solid fa-trophy" style="color: var(--secondary);"></i> Supervised Regression Performance Metrics (Target: time_in_hospital)</div>
+              <span class="badge badge-mint"><i class="fa-solid fa-clock"></i> Continuous Length of Stay (1-14 days)</span>
+            </div>
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Model Algorithm</th>
+                    <th>MAE (Days)</th>
+                    <th>MSE</th>
+                    <th>RMSE</th>
+                    <th>R&sup2; Score</th>
+                    <th>Adjusted R&sup2;</th>
+                    <th>Performance Rank & Status</th>
+                  </tr>
+                </thead>
+                <tbody id="metricsRegressionTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="glass-panel" style="margin-top: 1.5rem;">
+            <div class="panel-header">
+              <div class="panel-title"><i class="fa-solid fa-chart-column" style="color: var(--accent-cyan);"></i> Regression Error Metrics Comparison (MAE vs RMSE)</div>
+            </div>
+            <div class="chart-container">
+              <canvas id="regressionCompChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Classification Metrics Tab -->
+        <div id="tab-metric-classification" class="tab-content">
+          <div class="glass-panel">
+            <div class="panel-header" style="justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;">
+              <div class="panel-title"><i class="fa-solid fa-trophy" style="color: var(--secondary);"></i> Binary Classification Performance Metrics (Target: readmitted)</div>
+              <span class="badge badge-yellow"><i class="fa-solid fa-bullseye"></i> Binary (2 Classes: NO vs Readmitted)</span>
+            </div>
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Model Algorithm</th>
+                    <th>ROC-AUC</th>
+                    <th>Accuracy</th>
+                    <th>Precision</th>
+                    <th>Recall</th>
+                    <th>F1-Score</th>
+                    <th>Benchmark Status</th>
+                  </tr>
+                </thead>
+                <tbody id="metricsClassificationTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="glass-panel" style="margin-top: 1.5rem;">
+            <div class="panel-header">
+              <div class="panel-title"><i class="fa-solid fa-chart-bar" style="color: var(--accent-cyan);"></i> Classification Discrimination Metrics (ROC-AUC & Accuracy)</div>
+            </div>
+            <div class="chart-container">
+              <canvas id="classificationCompChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Unsupervised Metrics Tab -->
+        <div id="tab-metric-clustering" class="tab-content">
+          <div class="glass-panel">
+            <div class="panel-header" style="justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;">
+              <div class="panel-title"><i class="fa-solid fa-diagram-project" style="color: var(--accent-purple);"></i> Unsupervised Clustering & Anomaly Detection Evaluation Table</div>
+              <span class="badge badge-mint"><i class="fa-solid fa-fingerprint"></i> Target-Independent Machine Learning</span>
+            </div>
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Model / Technique</th>
+                    <th>Learning Paradigm</th>
+                    <th>Key Hyperparameters</th>
+                    <th>Silhouette Score</th>
+                    <th>Primary Quality Metric</th>
+                    <th>Secondary Diagnostic</th>
+                    <th>Pipeline Benchmark Status</th>
+                  </tr>
+                </thead>
+                <tbody id="metricsUnsupervisedTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="grid-2" style="margin-top: 1.5rem;">
+            <div class="glass-panel">
+              <div class="panel-header">
+                <div class="panel-title"><i class="fa-solid fa-chart-column" style="color: var(--primary);"></i> Unsupervised Silhouette & Separation Comparison</div>
+              </div>
+              <div class="chart-container">
+                <canvas id="clusteringCompChart"></canvas>
+              </div>
+            </div>
+
+            <div class="glass-panel">
+              <div class="panel-header">
+                <div class="panel-title"><i class="fa-solid fa-stethoscope" style="color: var(--accent-amber);"></i> Unsupervised Clinical Evaluation Takeaways</div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 0.85rem; padding-top: 0.35rem;">
+                <div class="tilt-metric-item" style="padding: 1rem;">
+                  <div class="tilt-metric-label">CLUSTERING COHORT SEPARATION</div>
+                  <div class="tilt-metric-value highlight-mint">K-Means Peak Silhouette (0.185)</div>
+                  <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.25rem;">
+                    K=3 yields well-bounded patient clusters (Calinski-Harabasz: 1,428.5; Davies-Bouldin: 1.642).
+                  </div>
+                </div>
+                <div class="tilt-metric-item" style="padding: 1rem;">
+                  <div class="tilt-metric-label">OUTLIER & ANOMALY FILTERING</div>
+                  <div class="tilt-metric-value highlight-yellow">5,088 Outlier Encounters Flagged</div>
+                  <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.25rem;">
+                    Isolation Forest at 5% contamination detects severe multi-diagnosis atypical clinical trajectories.
+                  </div>
+                </div>
+                <div class="tilt-metric-item" style="padding: 1rem;">
+                  <div class="tilt-metric-label">DIMENSIONALITY COMPRESSION</div>
+                  <div class="tilt-metric-value" style="color: var(--accent-cyan);">68.4% Variance Retained in 10 PCs</div>
+                  <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.25rem;">
+                    Compresses 133 engineered features into 10 orthogonal axes with minimal information loss.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           7. MODEL EVALUATION: LEARNING CURVES VIEW
+           ========================================== -->
+      <section id="page-learning-curves" class="page-view">
+        <div class="view-header">
+          <h2><i class="fa-solid fa-arrow-trend-up" style="color: var(--primary);"></i> Model Evaluation — Cross-Validation Learning Curves</h2>
+          <p>Training vs. Validation performance progression across increasing sample dataset sizes.</p>
+        </div>
+
+        <div class="glass-panel">
+          <div class="panel-header">
+            <div class="panel-title"><i class="fa-solid fa-chart-line" style="color: var(--primary);"></i> Learning Curve Convergence Chart</div>
+          </div>
+          <div class="chart-container" style="height: 380px;">
+            <canvas id="learningCurveChart"></canvas>
+          </div>
+          <div style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-muted);">
+            <i class="fa-solid fa-circle-info" style="color: var(--primary);"></i> As training samples increase from 1,000 to 20,000, validation score converges smoothly (~64.2% accuracy / ~0.395 R&sup2;), demonstrating model stability without high variance overfitting.
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           7. CLINICAL PREDICTOR TOOL
+           ========================================== -->
+      <section id="page-predictor" class="page-view">
+        <div class="view-header">
+          <h2><i class="fa-solid fa-user-doctor" style="color: var(--primary);"></i> Clinical Decision Support Predictor</h2>
+          <p>Interactive tool predicting both estimated Length of Hospital Stay (days) and 30-day Readmission Risk probability.</p>
+        </div>
+
+        <div class="grid-2">
+          <div class="glass-panel">
+            <div class="panel-header">
+              <div class="panel-title"><i class="fa-solid fa-sliders"></i> Enter Patient Parameters</div>
+            </div>
+            
+            <form id="predictorForm">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="inputTimeHosp">Time in Hospital (Days)</label>
+                  <input type="number" id="inputTimeHosp" class="form-control" min="1" max="14" value="4" required>
+                </div>
+                <div class="form-group">
+                  <label for="inputNumLabs">Num Lab Procedures</label>
+                  <input type="number" id="inputNumLabs" class="form-control" min="1" max="130" value="42" required>
+                </div>
+                <div class="form-group">
+                  <label for="inputNumMeds">Num Medications</label>
+                  <input type="number" id="inputNumMeds" class="form-control" min="1" max="80" value="16" required>
+                </div>
+                <div class="form-group">
+                  <label for="inputNumInpatient">Prior Inpatient Visits (Last 1yr)</label>
+                  <input type="number" id="inputNumInpatient" class="form-control" min="0" max="20" value="1" required>
+                </div>
+                <div class="form-group">
+                  <label for="inputNumEmerg">Prior Emergency Visits</label>
+                  <input type="number" id="inputNumEmerg" class="form-control" min="0" max="20" value="0" required>
+                </div>
+                <div class="form-group">
+                  <label for="inputNumOutpatient">Prior Outpatient Visits</label>
+                  <input type="number" id="inputNumOutpatient" class="form-control" min="0" max="20" value="0" required>
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary" style="width: 100%;">
+                <i class="fa-solid fa-calculator"></i> Calculate Dual Risk Predictions
+              </button>
+            </form>
+          </div>
+
+          <!-- Result Gauge Box -->
+          <div class="prediction-box">
+            <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em;">
+              Predicted Readmission Probability (2 Classes)
+            </div>
+
+            <div id="predictionGauge" class="prediction-gauge" style="--risk-percent: 36;">
+              <div class="prediction-gauge-inner">
+                <div id="predictionScore" class="prediction-score">36%</div>
+                <div style="font-size: 0.7rem; color: var(--text-muted);">Risk Probability</div>
+              </div>
+            </div>
+
+            <div style="margin-bottom: 0.75rem;">
+              <span id="predictionCategory" class="tag tag-warning">MODERATE RISK OF READMISSION</span>
+            </div>
+
+            <div style="background: rgba(255, 255, 255, 0.04); border-radius: 8px; padding: 0.75rem 1.25rem; margin-bottom: 1rem; width: 100%; max-width: 320px;">
+              <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">ESTIMATED LENGTH OF STAY (REGRESSION)</div>
+              <div id="predictionStayValue" style="font-size: 1.4rem; font-weight: 800; color: var(--secondary); margin-top: 0.15rem;">
+                4.3 Days &plusmn; 1.7d
+              </div>
+            </div>
+
+            <p id="predictionRec" style="font-size: 0.85rem; color: var(--text-muted); max-width: 320px; line-height: 1.5;">
+              Moderate readmission risk. Recommend standard post-discharge follow-up within 14 days and glycemic control review.
+            </p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+</div>
+
+<!-- ==========================================
+     EXPANDED MODEL DETAILS MODAL DIALOG
+     ========================================== -->
+<div id="modelModalOverlay" class="model-modal-overlay">
+  <div class="model-modal-container">
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <div id="modalIcon" class="modal-icon"><i class="fa-solid fa-robot"></i></div>
+        <div>
+          <div id="modalTitle" class="modal-title">Model Name</div>
+          <div id="modalSubtitle" class="modal-subtitle">
+            <span id="modalTypeBadge" class="badge badge-mint">Regression</span>
+            <span id="modalTargetBadge" class="badge">Target: time_in_hospital</span>
+          </div>
+        </div>
+      </div>
+      <button id="modalCloseBtn" class="modal-close-btn" title="Close Details"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <!-- Key Metrics Showcase -->
+    <div id="modalMetricsShowcase" class="modal-metrics-showcase">
+      <!-- Populated dynamically -->
+    </div>
+
+    <!-- Description & Formula -->
+    <div style="background: rgba(0,0,0,0.25); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 1.25rem; margin-bottom: 1.5rem;">
+      <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Algorithm Architecture & Formulation</div>
+      <div id="modalDescription" style="font-size: 0.92rem; color: var(--text-main); margin-top: 0.35rem; line-height: 1.55;">
+        Architecture details...
+      </div>
+      <div id="modalFormula" style="font-family: monospace; font-size: 0.88rem; color: var(--secondary); margin-top: 0.5rem; background: rgba(0,0,0,0.4); padding: 0.4rem 0.75rem; border-radius: 4px; display: inline-block;">
+        Formula
+      </div>
+    </div>
+
+    <!-- Dynamic Chart Section -->
+    <div class="modal-chart-section">
+      <div class="modal-chart-header">
+        <i class="fa-solid fa-chart-column" style="color: var(--primary);"></i>
+        <span id="modalChartTitle">Model Output Visualization</span>
+      </div>
+      <div class="chart-container" style="height: 320px;">
+        <canvas id="modalChartCanvas"></canvas>
+      </div>
+    </div>
+
+    <!-- Hyperparameters & Clinical Insights -->
+    <div class="grid-2">
+      <div class="glass-panel" style="margin-bottom: 0;">
+        <div class="panel-header">
+          <div class="panel-title"><i class="fa-solid fa-gears"></i> Hyperparameters & Training Configuration</div>
+        </div>
+        <div class="table-responsive">
+          <table class="custom-table">
+            <thead>
+              <tr><th>Parameter</th><th>Value Configured</th></tr>
+            </thead>
+            <tbody id="modalParamsTableBody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="glass-panel" style="margin-bottom: 0;">
+        <div class="panel-header">
+          <div class="panel-title"><i class="fa-solid fa-stethoscope" style="color: var(--primary);"></i> Clinical Translation & Practical Guidance</div>
+        </div>
+        <p id="modalClinicalInsight" style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.6; padding-top: 0.5rem;">
+          Clinical takeaway...
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Custom Application Script -->
+<script src="app.js?v=2.2"></script>
+</body>
+</html>
